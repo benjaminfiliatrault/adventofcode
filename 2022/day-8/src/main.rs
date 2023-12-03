@@ -36,8 +36,8 @@ fn main() {
             if col_idx == rows.len() - 1 { continue; }
 
             
-            let row_lookup = grid_trees[row_idx].iter().enumerate().peekable(); 
-   
+            let row_lookup = grid_trees[row_idx].iter().enumerate();  
+
             let mut is_left_visible = true;
             let mut is_right_visible = true;
 
@@ -85,7 +85,6 @@ fn main() {
 
     }
 
-
     let rows_count = grid_trees.len();
     let col_count = grid_trees[0].len();
 
@@ -94,4 +93,89 @@ fn main() {
    visible_trees += (rows_count * 2) + ((col_count - 2) * 2); 
 
     println!("{:}", visible_trees);
+
+
+
+
+    // BONUS DOWN THERE
+
+    let mut scenic_scores = Vec::new();
+
+    for (row_idx, rows) in grid_trees.iter().enumerate() {
+        for (col_idx, current_number) in rows.iter().enumerate() {
+            let mut row_lookup = grid_trees[row_idx].iter().enumerate().peekable();  
+
+            let mut is_left_visible = true;
+
+            let mut left_amount_visible = 0;
+            let mut right_amount_visible = 0;
+
+            // Row lookup
+            while let Some((idx, number)) = row_lookup.next() {
+                if idx == col_idx {
+                    if is_left_visible {
+                        left_amount_visible = idx;
+                    }
+                    continue;
+                }
+
+                if number >= current_number && idx < col_idx {
+                    left_amount_visible = col_idx - idx;
+                    is_left_visible = false;
+                }
+
+                if number >= current_number && idx > col_idx {
+                    right_amount_visible = idx - col_idx;
+                    break;
+                }
+
+                if row_lookup.peek().is_none() {
+                    right_amount_visible = idx - col_idx;
+                }
+            }
+
+            let mut col_lookup = grid_trees.iter().enumerate().peekable();
+            
+            let mut is_top_visible = true;
+            let mut top_amount_visible = 0;
+            let mut bottom_amount_visible = 0;
+
+            // Column lookup
+            while let Some((idx, col)) = col_lookup.next() {
+                if idx == row_idx {
+                    if is_top_visible {
+                        top_amount_visible = idx;
+                    }
+                    continue;
+                }
+
+                let number = col[col_idx];
+
+                if number >= *current_number && idx < row_idx {
+                    top_amount_visible = row_idx - idx;   
+                    is_top_visible = false;
+                }
+
+                if number >= *current_number && idx > row_idx {
+                    bottom_amount_visible = idx - row_idx;
+                    break;
+                }
+
+                if col_lookup.peek().is_none() {
+                    bottom_amount_visible = idx - row_idx;
+                }
+            }
+
+            let scenic_score = left_amount_visible * right_amount_visible * top_amount_visible * bottom_amount_visible;
+
+            scenic_scores.push(scenic_score);
+        }
+
+    }
+
+
+    let highest_scene = scenic_scores.iter().max().expect("Cannot find the max value");
+
+    println!("{:?}", highest_scene);
+
 }
